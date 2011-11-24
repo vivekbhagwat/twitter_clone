@@ -12,11 +12,15 @@ class Message
     
     $global_id += 1
   end
+  
+  def to_s
+    contents
+  end
 end
 
 messages = Hash.new
 
-get /\// do
+get '/' do
   @body = '<form action="post" method="POST">
   Post Message Here <input type ="text" name="message" />
   <input type="submit"/>
@@ -31,21 +35,29 @@ end
 
 post '/post' do
   @body = '<h3>Congratulations, you have successfully posted something that will be lost</h3>' +
-    params[:message]
+    params[:message] + ' with id: ' + $global_id.to_s
   
-  messages[@global_id] = Message.new(params[:message], @global_id)
+  messages[$global_id.to_i] = Message.new(params[:message], $global_id.to_i)
+  
+  @body += ' and id is now' +  $global_id.to_s
     
   erb :index
 end
 
 get '/post/:id' do
-  @body = @messages[:id.to_i]
+  id = params[:id].to_s
+  if messages[id.to_i]
+    @body = "Message: " + messages[id.to_i].contents
+  else
+    @body = "No such message exists"
+  end
   
   erb :index
 end
 
 delete '/post/:id' do
-  @messages[:id.to_i] = nil
+  id = params[:id]
+  @messages[id.to_i] = nil
   @body = "Deleted."
   
   erb :index
