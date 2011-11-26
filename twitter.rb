@@ -4,7 +4,7 @@ require 'erb'
 $global_id = 1
 
 class Message
-  attr_accessor :contents, :id, :timestamp
+  attr_accessor :contents, :id, :timestamp, :user
   
   def initialize(str='', id=0)
     @contents = str
@@ -14,8 +14,12 @@ class Message
     $global_id += 1
   end
   
+  def to_json
+    nil.to_s
+  end
+  
   def to_s
-    "Message: " + @contents + " at " + @timestamp
+    @contents + " posted at " + @timestamp
   end
 end
 
@@ -48,11 +52,19 @@ end
 
 get '/post/all' do
   @body = '<h3>All Messages</h3>'
-  messages.each do |m|
-    @body += m.to_s
+  messages.each do |id, m|
+    @body += m.to_s + '<br/>'
   end
   
   erb :index
+end
+
+get '/posts' do
+  redirect('/post/all')
+end
+
+get '/all' do
+  redirect('/post/all')
 end
 
 get '/post/:id' do
