@@ -4,17 +4,18 @@ require 'erb'
 $global_id = 1
 
 class Message
-  attr_accessor :contents, :id
+  attr_accessor :contents, :id, :timestamp
   
   def initialize(str='', id=0)
     @contents = str
     @id = id
+    @timestamp = Time.now.to_s
     
     $global_id += 1
   end
   
   def to_s
-    contents
+    "Message: " + @contents + " at " + @timestamp
   end
 end
 
@@ -34,13 +35,23 @@ get '/post' do
 end
 
 post '/post' do
-  @body = '<h3>Congratulations, you have successfully posted something that will be lost</h3>' +
-    params[:message] + ' with id: ' + $global_id.to_s
-  
-  messages[$global_id.to_i] = Message.new(params[:message], $global_id.to_i)
+  m = Message.new(params[:message], $global_id.to_i)
+  messages[$global_id.to_i] = m
+    
+  @body = '<h3>Congratulations, you have successfully posted </h3>' +
+    m.to_s + ' with id: ' + m.id.to_s
   
   @body += ' and id is now' +  $global_id.to_s
     
+  erb :index
+end
+
+get '/post/all' do
+  @body = '<h3>All Messages</h3>'
+  messages.each do |m|
+    @body += m.to_s
+  end
+  
   erb :index
 end
 
@@ -48,7 +59,7 @@ get '/post/:id' do
   id = params[:id].to_s
   @body = "No such message exists"
   if messages[id.to_i]
-    @body = "Message: " + messages[id.to_i].contents
+    @body = m.to_s
     @body += "<br/>" + '<form action="" method="DELETE"><input type="submit" value="Delete"/></form>'
   end
 
