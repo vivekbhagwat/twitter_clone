@@ -46,12 +46,12 @@ end
 
 get '/post/:id' do
   id = params[:id].to_s
+  @body = "No such message exists"
   if messages[id.to_i]
     @body = "Message: " + messages[id.to_i].contents
-  else
-    @body = "No such message exists"
+    @body += "<br/>" + '<form action="" method="DELETE"><input type="submit" value="Delete"/></form>'
   end
-  
+
   erb :index
 end
 
